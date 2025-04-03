@@ -6,13 +6,13 @@ const path = require("path");
 const moment = require("moment");
 const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
-
+const todoRoutes = require("./routes/todoRoutes");
 const isTestEnv = process.env.NODE_ENV === "test"; // Check if running tests
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-
+app.use(todoRoutes);
 // Disable CSRF for tests
 if (!isTestEnv) {
   app.use(csrf({ cookie: true })); // CSRF protection only in production

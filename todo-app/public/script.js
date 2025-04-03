@@ -1,29 +1,21 @@
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".complete-btn").forEach((button) => {
-        button.addEventListener("click", async (event) => {
-            const todoId = event.target.dataset.id;
-            try {
-                const response = await fetch(`/todos/${todoId}/markAsCompleted`, { method: "PUT" });
-                if (response.ok) {
-                    location.reload(); // Reload the page to reflect changes
-                }
-            } catch (error) {
-                console.error("Failed to mark as completed:", error);
+async function toggleCompletion(todoId) {
+    try {
+        const response = await fetch(`/todos/${todoId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             }
         });
-    });
 
-    document.querySelectorAll(".delete-btn").forEach((button) => {
-        button.addEventListener("click", async (event) => {
-            const todoId = event.target.dataset.id;
-            try {
-                const response = await fetch(`/todos/${todoId}`, { method: "DELETE" });
-                if (response.ok) {
-                    location.reload();
-                }
-            } catch (error) {
-                console.error("Failed to delete todo:", error);
-            }
-        });
-    });
-});
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("Updated Todo:", result);
+        location.reload();
+    } catch (error) {
+        console.error("Error toggling completion:", error);
+    }
+}
