@@ -12,13 +12,23 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 // Update the root route to render index.ejs
-app.get("/", async function (request, response) {
+app.get("/", async (req, res) => {
   try {
-    const todos = await Todo.findAll(); // Fetch todos from DB
-    response.render("index", { todos }); // Render index.ejs and pass todos
+    const todos = await Todo.findAll();
+    const today = moment().format("YYYY-MM-DD");
+
+    const overdueTodos = todos.filter(todo => todo.dueDate < today && !todo.completed);
+    const dueTodayTodos = todos.filter(todo => todo.dueDate === today);
+    const dueLaterTodos = todos.filter(todo => todo.dueDate > today);
+
+    res.render("index", {
+      overdueTodos,
+      dueTodayTodos,
+      dueLaterTodos,
+    });
   } catch (error) {
-    console.log(error);
-    response.status(500).send("Error loading page");
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -43,15 +53,17 @@ app.get("/todos/:id", async function (request, response) {
   }
 });
 
-app.post("/todos", async function (request, response) {
+app.post("/todos", async (req, res) => {
   try {
-    const todo = await Todo.addTodo(request.body);
-    return response.json(todo);
+    const { title, dueDate } = req.body;
+    await Todo.create({ title, dueDate, completed: false });
+    res.redirect("/");
   } catch (error) {
     console.log(error);
-    return response.status(422).json(error);
+    res.status(500).send("Error creating todo");
   }
 });
+
 
 app.put("/todos/:id/markAsCompleted", async function (request, response) {
   const todo = await Todo.findByPk(request.params.id);

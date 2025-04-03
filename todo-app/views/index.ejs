@@ -1,24 +1,31 @@
-<h1>This is my Todo Application</h1>  <!-- Header for automated test -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Todo App</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include("header") %>
 
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Due Date</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% todos.forEach(todo => { %>
-        <tr>
-            <td><%= todo.id %></td>
-            <td><%= todo.title %></td>
-            <td><%= todo.dueDate %></td>
-            <td><%= todo.completed ? "✅ Completed" : "❌ Pending" %></td>
-        </tr>
-        <% }); %>
-    </tbody>
-</table>
+    <h1>This is my Todo Application</h1>
 
-<h1>Built with Node.js</h1>  <!-- Footer for automated test -->
+    <form action="/todos" method="POST">
+        <input type="text" name="title" placeholder="Enter todo title" required>
+        <input type="date" name="dueDate" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <h5>Overdue (<span id="count-overdue"><%= overdueTodos.length %></span>)</h5>
+    <%- include("todos", { todos: overdueTodos }) %>
+
+    <h5>Due Today (<span id="count-due-today"><%= dueTodayTodos.length %></span>)</h5>
+    <%- include("todos", { todos: dueTodayTodos }) %>
+
+    <h5>Due Later (<span id="count-due-later"><%= dueLaterTodos.length %></span>)</h5>
+    <%- include("todos", { todos: dueLaterTodos }) %>
+
+    <%- include("footer") %>
+</body>
+</html>
