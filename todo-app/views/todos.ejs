@@ -1,16 +1,32 @@
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Due Date</th>
-        <th>Status</th>
-    </tr>
-    <% todos.forEach(todo => { %>
-    <tr>
-        <td><%= todo.id %></td>
-        <td><%= todo.title %></td>
-        <td><%= todo.dueDate %></td>
-        <td><%= todo.completed ? "✅ Completed" : "❌ Pending" %></td>
-    </tr>
-    <% }); %>
-</table>
+<h5>Overdue (<span id="count-overdue"><%= overdueTodos.length %></span>)</h5>
+<ul>
+    <% if (overdueTodos.length > 0) { %>
+        <% overdueTodos.forEach(todo => { %>
+            <li><%= todo.title %> - <%= todo.dueDate %> - <%= todo.completed ? "✅ Completed" : "❌ Pending" %></li>
+        <% }); %>
+    <% } else { %>
+        <li>No overdue tasks</li>
+    <% } %>
+</ul>
+
+<h5>Due Today (<span id="count-due-today"><%= dueTodayTodos.length %></span>)</h5>
+<ul>
+    <% if (dueTodayTodos.length > 0) { %>
+        <% dueTodayTodos.forEach(todo => { %>
+            <li><%= todo.title %> - <%= todo.dueDate %> - <%= todo.completed ? "✅ Completed" : "❌ Pending" %></li>
+        <% }); %>
+    <% } else { %>
+        <li>No tasks for today</li>
+    <% } %>
+</ul>
+
+<h5>Due Later (<span id="count-due-later"><%= dueLaterTodos.length %></span>)</h5>
+<ul>
+    <% if (dueLaterTodos.length > 0) { %>
+        <% dueLaterTodos.forEach(todo => { %>
+            <li><%= todo.title %> - <%= todo.dueDate %> - <%= todo.completed ? "✅ Completed" : "❌ Pending" %></li>
+        <% }); %>
+    <% } else { %>
+        <li>No upcoming tasks</li>
+    <% } %>
+</ul>

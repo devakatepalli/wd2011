@@ -3,33 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Todo App</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>To-Do Manager</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Add CSS if needed -->
 </head>
 <body>
-    <%- include("header") %>
+    <h1>To-Do Manager</h1>
 
-    <h1>My Todo Application</h1>
-
-    <!-- Todo Form -->
+    <!-- Form to add new todo -->
     <form action="/todos" method="POST">
-        <input type="text" name="title" placeholder="Enter todo title" required>
+        <input type="text" name="title" placeholder="Enter task title" required>
         <input type="date" name="dueDate" required>
         <button type="submit">Add</button>
     </form>
 
-    <!-- Overdue Section -->
-    <h5>Overdue (<span id="count-overdue"><%= overdueTodos.length %></span>)</h5>
-    <%- include("todos", { todos: overdueTodos }) %>
+    <!-- Importing todos.ejs to display the list -->
+    <%- include("todos") %>
 
-    <!-- Due Today Section -->
-    <h5>Due Today (<span id="count-due-today"><%= dueTodayTodos.length %></span>)</h5>
-    <%- include("todos", { todos: dueTodayTodos }) %>
-
-    <!-- Due Later Section -->
-    <h5>Due Later (<span id="count-due-later"><%= dueLaterTodos.length %></span>)</h5>
-    <%- include("todos", { todos: dueLaterTodos }) %>
-
-    <%- include("footer") %>
 </body>
 </html>
