@@ -9,20 +9,24 @@
 <body>
     <%- include("header") %>
 
-    <h1>This is my Todo Application</h1>
+    <h1>My Todo Application</h1>
 
+    <!-- Todo Form -->
     <form action="/todos" method="POST">
         <input type="text" name="title" placeholder="Enter todo title" required>
         <input type="date" name="dueDate" required>
         <button type="submit">Add</button>
     </form>
 
+    <!-- Overdue Section -->
     <h5>Overdue (<span id="count-overdue"><%= overdueTodos.length %></span>)</h5>
     <%- include("todos", { todos: overdueTodos }) %>
 
+    <!-- Due Today Section -->
     <h5>Due Today (<span id="count-due-today"><%= dueTodayTodos.length %></span>)</h5>
     <%- include("todos", { todos: dueTodayTodos }) %>
 
+    <!-- Due Later Section -->
     <h5>Due Later (<span id="count-due-later"><%= dueLaterTodos.length %></span>)</h5>
     <%- include("todos", { todos: dueLaterTodos }) %>
 
