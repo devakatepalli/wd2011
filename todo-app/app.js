@@ -14,11 +14,18 @@ app.use(express.static(path.join(__dirname, "public"))); // Serve static files
 // Root route to render index.ejs
 app.get("/", async (req, res) => {
   try {
-    const overdueTodos = await Todo.overdue();
-    const dueTodayTodos = await Todo.dueToday();
-    const dueLaterTodos = await Todo.dueLater();
-    
-    res.render("index", { overdueTodos, dueTodayTodos, dueLaterTodos });
+    const todos = await Todo.findAll();
+    const today = moment().format("YYYY-MM-DD");
+
+    const overdueTodos = todos.filter(todo => todo.dueDate < today); // FIXED
+    const dueTodayTodos = todos.filter(todo => todo.dueDate === today);
+    const dueLaterTodos = todos.filter(todo => todo.dueDate > today);
+
+    res.render("index", {
+      overdueTodos,
+      dueTodayTodos,
+      dueLaterTodos,
+    });
   } catch (error) {
     console.error("Error fetching todos:", error);
     res.status(500).send("Internal Server Error");
@@ -72,8 +79,13 @@ app.put("/todos/:id/markAsCompleted", async (req, res) => {
     if (!todo) {
       return res.status(404).json({ error: "Todo not found" });
     }
-    todo.completed = true; // Mark as completed
-    await todo.save(); // Save the updated todo
+
+    if (todo.completed) { // FIXED
+      return res.status(400).json({ error: "Todo is already completed" });
+    }
+
+    todo.completed = true;
+    await todo.save();
     return res.json(todo);
   } catch (error) {
     console.error("Error marking todo as completed:", error);
@@ -89,7 +101,7 @@ app.delete("/todos/:id", async (req, res) => {
       return res.status(404).json({ error: "Todo not found" });
     }
     await todo.destroy();
-    return res.json(true); // Respond with true to indicate successful deletion
+    res.redirect("/"); // FIXED: Redirect after deletion
   } catch (error) {
     console.error("Error deleting todo:", error);
     return res.status(500).json({ error: "Failed to delete todo" });

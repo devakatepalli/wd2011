@@ -7,9 +7,8 @@
     <link rel="stylesheet" href="/styles.css"> <!-- Add CSS if needed -->
 </head>
 <body>
-    <%- include("header") %> <!-- Include header -->
-
-    <h1>To-Do Manager</h1> <!-- Title of the application -->
+    <!-- Importing header -->
+    <%- include("header") %>
 
     <!-- Form to add new todo -->
     <form action="/todos" method="POST">
@@ -19,8 +18,9 @@
     </form>
 
     <!-- Importing todos.ejs to display the list -->
-    <%- include("todos", { overdueTodos: overdueTodos, dueTodayTodos: dueTodayTodos, dueLaterTodos: dueLaterTodos }) %>
+    <%- include("todos") %>
 
-    <%- include("footer") %> <!-- Include footer -->
+    <!-- Importing footer -->
+    <%- include("footer") %>
 </body>
 </html>
