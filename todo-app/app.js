@@ -74,17 +74,26 @@ app.get("/todos/:id", async (req, res) => {
 // ✏️ **POST: Create a New Todo**
 app.post("/todos", async (req, res) => {
   try {
-    const { title, dueDate } = req.body;
+    const { title, dueDate, completed } = req.body;
+
     if (!title.trim() || !dueDate) {
       return res.status(400).json({ error: "Title and due date are required" });
     }
-    const todo = await Todo.create({ title, dueDate, completed: false });
+
+    // Ensure 'completed' defaults to false if not provided
+    const todo = await Todo.create({ 
+      title, 
+      dueDate, 
+      completed: completed || false 
+    });
+
     return res.json(todo);
   } catch (error) {
-    console.error("❌ Error creating todo:", error);
+    console.error("Error creating todo:", error);
     return res.status(500).json({ error: "Failed to create todo" });
   }
 });
+
 
 // ✅ **PUT: Mark a Todo as Completed**
 app.put("/todos/:id/markAsCompleted", async (req, res) => {
@@ -106,16 +115,16 @@ app.put("/todos/:id", async (req, res) => {
     const todo = await Todo.findByPk(req.params.id);
     if (!todo) return res.status(404).json({ error: "Todo not found" });
 
-    const { completed } = req.body;
-    const isCompleted = completed === "true" || completed === true;
-    await todo.update({ completed: isCompleted });
+    // Toggle completed status
+    const updatedTodo = await todo.update({ completed: !todo.completed });
 
-    return res.json(todo);
+    return res.json(updatedTodo);
   } catch (error) {
-    console.error("❌ Error updating todo:", error);
+    console.error("Error updating todo:", error);
     return res.status(500).json({ error: "Failed to update todo" });
   }
 });
+
 
 // 🗑️ **DELETE: Remove a Todo**
 app.delete("/todos/:id", async (req, res) => {
