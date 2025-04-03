@@ -98,14 +98,16 @@ app.post("/todos", async (req, res) => {
 // ✅ **PUT: Mark a Todo as Completed**
 app.put("/todos/:id/markAsCompleted", async (req, res) => {
   try {
-    const todo = await Todo.findByPk(req.params.id);
-    if (!todo) return res.status(404).json({ error: "Todo not found" });
-
-    await todo.update({ completed: true });
-    return res.json(todo);
+      const todo = await Todo.findByPk(req.params.id);
+      if (!todo) {
+          return res.status(404).json({ error: "Todo not found" });
+      }
+      todo.completed = true;
+      await todo.save();
+      return res.json(todo);
   } catch (error) {
-    console.error("❌ Error marking todo as completed:", error);
-    return res.status(500).json({ error: "Failed to mark todo as completed" });
+      console.error("❌ Error marking todo as completed:", error);
+      return res.status(500).json({ error: "Failed to mark todo as completed" });
   }
 });
 
@@ -138,14 +140,15 @@ app.put("/todos/:id", async (req, res) => {
 // 🗑️ **DELETE: Remove a Todo**
 app.delete("/todos/:id", async (req, res) => {
   try {
-    const todo = await Todo.findByPk(req.params.id);
-    if (!todo) return res.status(404).json({ error: "Todo not found" });
-
-    await todo.destroy();
-    return res.json({ success: true });
+      const todo = await Todo.findByPk(req.params.id);
+      if (!todo) {
+          return res.status(404).json({ error: "Todo not found" });
+      }
+      await todo.destroy();
+      return res.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting todo:", error);
-    return res.status(500).json({ error: "Failed to delete todo" });
+      console.error("❌ Error deleting todo:", error);
+      return res.status(500).json({ error: "Failed to delete todo" });
   }
 });
 

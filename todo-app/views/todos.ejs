@@ -1,3 +1,5 @@
 <h5>Overdue (<span id="count-overdue"><%= overdueTodos.length %></span>)</h5>
 <h5>Due Today (<span id="count-due-today"><%= dueTodayTodos.length %></span>)</h5>
 <h5>Due Later (<span id="count-due-later"><%= dueLaterTodos.length %></span>)</h5>
+<button class="complete-btn" data-id="<%= todo.id %>">Complete</button>
+<button class="delete-btn" data-id="<%= todo.id %>">Delete</button>
