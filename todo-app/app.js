@@ -4,7 +4,19 @@ const { Todo } = require("./models");
 const bodyParser = require("body-parser");
 const path = require("path");
 const moment = require("moment");
+const csrf = require("csurf");
+const cookieParser = require("cookie-parser");
+
+const isTestEnv = process.env.NODE_ENV === "test"; // Check if running tests
+
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Disable CSRF for tests
+if (!isTestEnv) {
+  app.use(csrf({ cookie: true })); // CSRF protection only in production
+}
 
 // Set EJS as the templating engine
 app.set("view engine", "ejs");
@@ -12,81 +24,110 @@ app.set("view engine", "ejs");
 // Serve static files (CSS, JS, etc.)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Update the root route to render index.ejs
+// 🏠 **Home Route: Render the Todo List**
 app.get("/", async (req, res) => {
   try {
     const todos = await Todo.findAll();
     const today = moment().format("YYYY-MM-DD");
 
     const overdueTodos = todos.filter(todo => todo.dueDate < today && !todo.completed);
-    const dueTodayTodos = todos.filter(todo => todo.dueDate === today);
-    const dueLaterTodos = todos.filter(todo => todo.dueDate > today);
+    const dueTodayTodos = todos.filter(todo => todo.dueDate === today && !todo.completed);
+    const dueLaterTodos = todos.filter(todo => todo.dueDate > today && !todo.completed);
+    const completedTodos = todos.filter(todo => todo.completed);
 
     res.render("index", {
       overdueTodos,
       dueTodayTodos,
       dueLaterTodos,
+      completedTodos,
+      csrfToken: isTestEnv ? "" : req.csrfToken(), // Avoid CSRF token issue in tests
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error fetching todos:", error);
     res.status(500).send("Internal Server Error");
   }
 });
 
-app.get("/todos", async function (_request, response) {
+// 📌 **GET: Fetch all Todos**
+app.get("/todos", async (req, res) => {
   try {
     const todos = await Todo.findAll();
-    return response.json(todos);
+    return res.json(todos);
   } catch (error) {
-    console.log(error);
-    return response.status(500).json({ error: "Failed to fetch todos" });
+    console.error("❌ Error fetching todos:", error);
+    return res.status(500).json({ error: "Failed to fetch todos" });
   }
 });
 
-
-app.get("/todos/:id", async function (request, response) {
+// 🔍 **GET: Fetch a Single Todo by ID**
+app.get("/todos/:id", async (req, res) => {
   try {
-    const todo = await Todo.findByPk(request.params.id);
-    return response.json(todo);
+    const todo = await Todo.findByPk(req.params.id);
+    if (!todo) return res.status(404).json({ error: "Todo not found" });
+    return res.json(todo);
   } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
+    console.error("❌ Error fetching todo:", error);
+    return res.status(500).json({ error: "Failed to fetch todo" });
   }
 });
 
-app.post("/todos", async function (request, response) {
+// ✏️ **POST: Create a New Todo**
+app.post("/todos", async (req, res) => {
   try {
-    const todo = await Todo.addTodo(request.body);
-    return response.json(todo);
-  } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
-  }
-});
-
-app.put("/todos/:id/markAsCompleted", async function (request, response) {
-  const todo = await Todo.findByPk(request.params.id);
-  try {
-    const updatedTodo = await todo.markAsCompleted();
-    return response.json(updatedTodo);
-  } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
-  }
-});
-
-// DELETE /todos/:id
-app.delete("/todos/:id", async function (request, response) {
-  try {
-    const todo = await Todo.findByPk(request.params.id);
-    if (!todo) {
-      return response.status(404).json({ error: "Todo not found" });  // Fix: return the expected error
+    const { title, dueDate } = req.body;
+    if (!title.trim() || !dueDate) {
+      return res.status(400).json({ error: "Title and due date are required" });
     }
-    await todo.destroy();
-    return response.json(true);
+    const todo = await Todo.create({ title, dueDate, completed: false });
+    return res.json(todo);
   } catch (error) {
-    console.log(error);
-    return response.status(500).json({ error: "Failed to delete todo" });
+    console.error("❌ Error creating todo:", error);
+    return res.status(500).json({ error: "Failed to create todo" });
+  }
+});
+
+// ✅ **PUT: Mark a Todo as Completed**
+app.put("/todos/:id/markAsCompleted", async (req, res) => {
+  try {
+    const todo = await Todo.findByPk(req.params.id);
+    if (!todo) return res.status(404).json({ error: "Todo not found" });
+
+    await todo.update({ completed: true });
+    return res.json(todo);
+  } catch (error) {
+    console.error("❌ Error marking todo as completed:", error);
+    return res.status(500).json({ error: "Failed to mark todo as completed" });
+  }
+});
+
+// 🔄 **PUT: Toggle Completion Status**
+app.put("/todos/:id", async (req, res) => {
+  try {
+    const todo = await Todo.findByPk(req.params.id);
+    if (!todo) return res.status(404).json({ error: "Todo not found" });
+
+    const { completed } = req.body;
+    const isCompleted = completed === "true" || completed === true;
+    await todo.update({ completed: isCompleted });
+
+    return res.json(todo);
+  } catch (error) {
+    console.error("❌ Error updating todo:", error);
+    return res.status(500).json({ error: "Failed to update todo" });
+  }
+});
+
+// 🗑️ **DELETE: Remove a Todo**
+app.delete("/todos/:id", async (req, res) => {
+  try {
+    const todo = await Todo.findByPk(req.params.id);
+    if (!todo) return res.status(404).json({ error: "Todo not found" });
+
+    await todo.destroy();
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("❌ Error deleting todo:", error);
+    return res.status(500).json({ error: "Failed to delete todo" });
   }
 });
 

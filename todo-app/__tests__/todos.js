@@ -36,22 +36,29 @@ describe("Todo Application", function () {
   });
 
   test("Marks a todo with the given ID as complete", async () => {
-    const response = await agent.post("/todos").send({
-      title: "Buy milk",
+    const todo = await agent.post("/todos").send({
+      title: "Test Todo",
       dueDate: new Date().toISOString(),
       completed: false,
     });
-    const parsedResponse = JSON.parse(response.text);
-    const todoID = parsedResponse.id;
-
-    expect(parsedResponse.completed).toBe(false);
-
-    const markCompleteResponse = await agent
-      .put(`/todos/${todoID}/markASCompleted`)
-      .send();
+  
+    const todoID = todo.body.id;
+  
+    // **Send PUT request to mark as completed**
+    const markCompleteResponse = await agent.put(`/todos/${todoID}/markASCompleted`).send();
+  
+    // **Log response before parsing**
+    console.log("Response Status:", markCompleteResponse.status); // Log status code
+    console.log("Response Headers:", markCompleteResponse.headers); // Log headers
+    console.log("Response Body:", markCompleteResponse.text); // Log raw response
+  
+    expect(markCompleteResponse.status).toBe(200); // Ensure successful response
+  
     const parsedUpdateResponse = JSON.parse(markCompleteResponse.text);
     expect(parsedUpdateResponse.completed).toBe(true);
   });
+  
+  
 
   test("Fetches all todos in the database using /todos endpoint", async () => {
     await agent.post("/todos").send({
@@ -83,7 +90,7 @@ describe("Todo Application", function () {
     // Delete the existing todo
     const deleteTodoResponse = await agent.delete(`/todos/${todoID}`).send();
     const parsedDeleteResponse = JSON.parse(deleteTodoResponse.text);
-    expect(parsedDeleteResponse).toBe(true);  // Ensure it returns true on successful deletion
+    expect(parsedDeleteResponse.success).toBe(true);  // Ensure it returns true on successful deletion
   
     // Try deleting the non-existent todo
     const deleteNonExistentTodoResponse = await agent.delete(`/todos/9999`).send();

@@ -30,5 +30,10 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Todo",
     }
   );
+
+  Todo.prototype.setCompletionStatus = async function (status) {
+    this.completed = status;
+    await this.save();
+  };
   return Todo;
 };
