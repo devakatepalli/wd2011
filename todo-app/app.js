@@ -2,10 +2,24 @@ const express = require("express");
 const app = express();
 const { Todo } = require("./models");
 const bodyParser = require("body-parser");
+const path = require("path");
 app.use(bodyParser.json());
 
-app.get("/", function (request, response) {
-  response.send("Hello World");
+// Set EJS as the templating engine
+app.set("view engine", "ejs");
+
+// Serve static files (CSS, JS, etc.)
+app.use(express.static(path.join(__dirname, "public")));
+
+// Update the root route to render index.ejs
+app.get("/", async function (request, response) {
+  try {
+    const todos = await Todo.findAll(); // Fetch todos from DB
+    response.render("index", { todos }); // Render index.ejs and pass todos
+  } catch (error) {
+    console.log(error);
+    response.status(500).send("Error loading page");
+  }
 });
 
 app.get("/todos", async function (_request, response) {
