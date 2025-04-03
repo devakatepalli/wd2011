@@ -1,0 +1,25 @@
+{
+  "development": {
+    "username": "root",
+    "password": "Care2data@19",
+    "database": "todo_db_dev",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  },
+  "test": {
+    "username": "root",
+    "password": "Care2data@19",
+    "database": "todo_db_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  },
+  "production": {
+    "username": "root",
+    "password": "Care2data@19",
+    "database": "todo_db_prod",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
