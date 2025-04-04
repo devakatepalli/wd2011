@@ -1,107 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>To-Do Manager</title>
-    <link rel="stylesheet" href="/styles.css"> <!-- Add CSS if needed -->
+    <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
 
-    <!-- Importing header -->
     <%- include("header") %>
 
     <h1>To-Do Manager</h1>
 
     <!-- Form to add new todo -->
     <form action="/todos" method="POST">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>"> <!-- CSRF Protection -->
-        <input type="text" name="title" placeholder="Enter task title" required>
-        <input type="date" name="dueDate" required>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <input type="text" name="title" placeholder="Enter task title" required />
+        <input type="date" name="dueDate" required />
         <button type="submit">Add</button>
     </form>
 
-    <hr>
+    <hr/>
 
-    <!-- Section to display todos -->
     <h2>Tasks</h2>
 
-    <h5>Overdue (<span id="overdue-count"><%= overdueTodos.length %></span>)</h3>
+    <h5>Overdue (<span id="count-overdue"><%= overdueTodos.length %></span>)</h5>
     <ul>
         <% overdueTodos.forEach(todo => { %>
             <li>
                 <%= todo.title %> - <%= todo.dueDate %>
-                <button onclick="toggleCompletion(<%= todo.id %>)">
-                    Mark as Complete
-                </button>
-                <button onclick="deleteTodo(<%= todo.id %>)">Delete</button>
+                <button class="complete-btn" data-id="<%= todo.id %>">Complete</button>
+                <button class="delete-btn" data-id="<%= todo.id %>">Delete</button>
             </li>
         <% }) %>
     </ul>
 
-    <h5>Due Today (<span id="due-today-count"><%= dueTodayTodos.length %></span>)</h3>
+    <h5>Due Today (<span id="count-due-today"><%= dueTodayTodos.length %></span>)</h5>
     <ul>
         <% dueTodayTodos.forEach(todo => { %>
             <li>
                 <%= todo.title %> - <%= todo.dueDate %>
-                <button onclick="toggleCompletion(<%= todo.id %>)">
-                    Mark as Complete
-                </button>
-                <button onclick="deleteTodo(<%= todo.id %>)">Delete</button>
+                <button class="complete-btn" data-id="<%= todo.id %>">Complete</button>
+                <button class="delete-btn" data-id="<%= todo.id %>">Delete</button>
             </li>
         <% }) %>
     </ul>
 
-    <h5>Due Later (<span id="due-later-count"><%= dueLaterTodos.length %></span>)</h3>
+    <h5>Due Later (<span id="count-due-later"><%= dueLaterTodos.length %></span>)</h5>
     <ul>
         <% dueLaterTodos.forEach(todo => { %>
             <li>
                 <%= todo.title %> - <%= todo.dueDate %>
-                <button onclick="toggleCompletion(<%= todo.id %>)">
-                    Mark as Complete
-                </button>
-                <button onclick="deleteTodo(<%= todo.id %>)">Delete</button>
+                <button class="complete-btn" data-id="<%= todo.id %>">Complete</button>
+                <button class="delete-btn" data-id="<%= todo.id %>">Delete</button>
             </li>
         <% }) %>
     </ul>
 
-    <h5>Completed (<span id="completed-count"><%= completedTodos.length %></span>)</h3>
+    <h5>Completed (<span id="count-completed"><%= completedTodos.length %></span>)</h5>
     <ul>
         <% completedTodos.forEach(todo => { %>
             <li>
-                <input type="checkbox" checked onclick="toggleCompletion(<%= todo.id %>)">
+                <input type="checkbox" checked onclick="toggleCompletion(<%= todo.id %>)" />
                 <%= todo.title %> - <%= todo.dueDate %>
                 <button onclick="deleteTodo(<%= todo.id %>)">Delete</button>
             </li>
         <% }) %>
     </ul>
 
-    <!-- Importing footer -->
     <%- include("footer") %>
 
     <script>
+        document.querySelectorAll(".complete-btn").forEach(btn => {
+            btn.addEventListener("click", () => toggleCompletion(btn.dataset.id));
+        });
+
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+            btn.addEventListener("click", () => deleteTodo(btn.dataset.id));
+        });
+
         async function toggleCompletion(todoId) {
             try {
-                const response = await fetch(`/todos/${todoId}`, { method: "PUT" });
-                const updatedTodo = await response.json();
-                location.reload(); // Refresh page to reflect changes
-            } catch (error) {
-                console.error("Error toggling completion:", error);
+                const response = await fetch(`/todos/${todoId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const updated = await response.json();
+                location.reload();
+            } catch (err) {
+                console.error("Error toggling completion:", err);
             }
         }
 
         async function deleteTodo(todoId) {
             try {
-                const response = await fetch(`/todos/${todoId}`, { method: "DELETE" });
+                const response = await fetch(`/todos/${todoId}`, {
+                    method: "DELETE",
+                });
                 const result = await response.json();
-                if (result.success) {
-                    location.reload(); // Refresh page after delete
-                }
-            } catch (error) {
-                console.error("Error deleting todo:", error);
+                if (result.success) location.reload();
+            } catch (err) {
+                console.error("Error deleting todo:", err);
             }
         }
     </script>
-
 </body>
 </html>
