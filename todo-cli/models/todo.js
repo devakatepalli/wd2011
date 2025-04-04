@@ -1,13 +1,14 @@
 const { Op } = require('sequelize'); // Import Sequelize Operators
 
 module.exports = (sequelize, DataTypes) => {
-  const Todo = sequelize.define('Todo', {
+  const Todo = sequelize.define("Todo", {
     title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     dueDate: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     completed: {
       type: DataTypes.BOOLEAN,
@@ -57,7 +58,9 @@ module.exports = (sequelize, DataTypes) => {
     if (todo) {
       todo.completed = true;
       await todo.save();
+      return todo; // Return the updated todo
     }
+    return null; // Return null if not found
   };
 
   // Function to get displayable string
@@ -68,6 +71,12 @@ module.exports = (sequelize, DataTypes) => {
         ? ''
         : ` ${this.dueDate}`;
     return `${this.id}. ${checkbox} ${this.title}${formattedDate}`;
+  };
+
+  // Function to delete a task by ID
+  Todo.deleteTask = async function (id) {
+    const deletedCount = await Todo.destroy({ where: { id } });
+    return deletedCount > 0; // Returns true if at least one row is deleted
   };
 
   return Todo;

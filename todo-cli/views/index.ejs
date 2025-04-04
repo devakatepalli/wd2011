@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Include header -->
+    <%- include("header") %>
+
+    <h2>My Todos</h2>
+
+    <!-- Add new todo form -->
+    <form action="/todos" method="POST">
+        <input type="text" name="title" placeholder="Enter todo title" required>
+        <input type="date" name="dueDate" required>
+        <button type="submit">Add Todo</button>
+    </form>
+
+    <!-- Display existing todos -->
+    <%- include("todos", { todos: todos }) %>
+
+    <!-- Include footer -->
+    <%- include("footer") %>
+</body>
+</html>

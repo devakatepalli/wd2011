@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const { Todo } = require("./models");
 const bodyParser = require("body-parser");
+
 app.use(bodyParser.json());
 
 // A simple route to check if the app is working
@@ -41,15 +42,14 @@ app.get("/todos/:id", async function (request, response) {
 app.post("/todos", async function (request, response) {
   try {
     const { title, dueDate, completed } = request.body;
-    const todo = await Todo.create({
-      title,
-      dueDate,
-      completed,
-    });
-    return response.json(todo);
+    if (!title || !dueDate) {
+      return response.status(400).json({ error: "Title and due date are required." });
+    }
+    const todo = await Todo.create({ title, dueDate, completed });
+    return response.status(201).json(todo);
   } catch (error) {
     console.log(error);
-    return response.status(422).json({ error: "Failed to create todo" });
+    return response.status(500).json({ error: "Failed to create todo" });
   }
 });
 

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "todo.js",
   "scripts": {
+    "start:prod":"node index.js",
     "test": "jest",
     "format": "prettier --write .",
     "prepare": "husky"
